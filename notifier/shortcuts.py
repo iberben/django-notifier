@@ -16,7 +16,7 @@ from notifier.models import Notification, Backend, UserPrefs
 ## Code
 ###############################################################################
 def create_notification(name, display_name=None,
-        permissions=None, backends=None, public=True):
+                        permissions=None, backends=None, public=True):
     """
     Arguments
 

@@ -101,6 +101,7 @@ class EmailBackend(BaseBackend):
                              self.context)).run()
 
         try:
+            # print '>> sending mail to ', to
             send_mail(subject=subject, message=text_message,
                       from_email=settings.DEFAULT_FROM_EMAIL,
                       recipient_list=[to, ],
