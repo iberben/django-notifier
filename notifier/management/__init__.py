@@ -66,23 +66,23 @@ def create_notifications(app, **kwargs):
             pass
 
 
-# if South:
-#     post_migrate.connect(
-#         create_backends,
-#         dispatch_uid="notifier.management.create_backends"
-#     )
-#     post_migrate.connect(
-#         create_notifications,
-#         dispatch_uid="notifier.management.create_notifications",
-#     )
-# else:
-#     post_migrate.connect(
-#         create_backends,
-#         dispatch_uid="notifier.management.create_backends",
-#         sender=notifier.models
-#     )
-#     post_migrate.connect(
-#         create_notifications,
-#         dispatch_uid="notifier.management.create_notifications",
-#         sender=notifier.models
-#     )
+if South:
+    post_migrate.connect(
+        create_backends,
+        dispatch_uid="notifier.management.create_backends"
+    )
+    post_migrate.connect(
+        create_notifications,
+        dispatch_uid="notifier.management.create_notifications",
+    )
+else:
+    post_migrate.connect(
+        create_backends,
+        dispatch_uid="notifier.management.create_backends",
+        sender=notifier.models
+    )
+    post_migrate.connect(
+        create_notifications,
+        dispatch_uid="notifier.management.create_notifications",
+        sender=notifier.models
+    )
