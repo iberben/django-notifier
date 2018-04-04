@@ -38,7 +38,6 @@ class BaseModel(models.Model):
 
 
 class Backend(BaseModel):
-
     """
     Entries for various delivery backends (SMS, Email)
     """
@@ -142,12 +141,36 @@ class Notification(BaseModel):
             return False
         return True
 
+    def get_users_interested(self):
+        """
+        Returns all users with their backend that are interested in this notification.
+        """
+        user_settings = self.userprefs_set.filter(notify=True)
+        group_settings = self.groupprefs_set.filter(notify=True)
+
+        interested = {}
+        for backend in self.backends.filter(enabled=True):
+            interested[backend] = []
+
+        for user in user_settings:
+            if user.backend.enabled:
+                interested[user.backend].append(user)
+
+        for group in group_settings:
+            if group.backend.enabled:
+                for user in get_user_model().objects.filter(groups__name=group.group.name):
+                    if user not in interested[group.backend]:
+                        interested[group.backend].append(user)
+
+        return interested
+
     def get_backends(self, user):
         """
         Returns backends after checking `User` and `Group` preferences
         as well as `backend.enabled` flag.
         """
         user_settings = self.userprefs_set.filter(user=user)
+
         group_filter = Q()
         for group in user.groups.all():
             group_filter = Q(group_filter | Q(group=group))

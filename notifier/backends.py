@@ -81,7 +81,7 @@ class EmailBackend(BaseBackend):
 
     def send_anonymous(self, to, context=None):
         """
-        Send en email to just an email address.
+        Send an email to just an email address.
         """
         if not context:
             self.context = {}
@@ -110,3 +110,27 @@ class EmailBackend(BaseBackend):
             return False
         else:
             return True
+
+
+class PushBackend(BaseBackend):
+    name = 'push'
+    display_name = 'Push'
+    description = 'Send via a push message'
+
+    def __init__(self, notification, *args, **kwargs):
+        super(PushBackend, self).__init__(notification, *args, **kwargs)
+
+        self.template_subject = (
+            'notifier/%s/%s_push.txt' % (notification.name, self.name)
+        )
+
+    def send(self, user, context=None):
+        super(PushBackend, self).send(user, context)
+
+        # todo send push message
+
+    def send_anonymous(self, to, context=None):
+        """
+        Send an email to just an email address.
+        """
+        raise Exception('Sending anonymous is not possible for the push backend')
