@@ -133,4 +133,5 @@ class PushBackend(BaseBackend):
         """
         Send an email to just an email address.
         """
-        raise Exception('Sending anonymous is not possible for the push backend')
+        # raise Exception('Sending anonymous is not possible for the push backend')
+        return False
