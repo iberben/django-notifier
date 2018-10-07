@@ -268,13 +268,17 @@ class Notification(BaseModel):
         return result
 
     def send(self, users, context=None):
+        # print '>> sending notification'
         if not isinstance(users, Iterable):
             users = [users]
 
         for user in users:
+            # print '>> sending to user ', user
             # check if user object
             if isinstance(user, get_user_model()):
                 for backend in self.get_backends(user):
+                    # print '>> backend ', backend
+                    # print backend.__class__
                     backend.send(user, self, context)
             # check for anonymous email address
             # bypass checks for preferences
