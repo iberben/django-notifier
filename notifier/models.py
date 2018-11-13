@@ -129,6 +129,9 @@ class Notification(BaseModel):
     def __str__(self):
         return self.name
 
+    class Meta:
+        ordering = ['display_name']
+
     def check_perms(self, user):
         # Need an iterable with permission strings to check using has_perms.
         # This makes it possible to take advantage of the cache.
