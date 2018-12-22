@@ -25,7 +25,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules'
     ],
     install_requires=[
-        "Django >= 1.4.0",
-        "pynliner==0.5.2",
+        "Django >= 2.0.0",
+        "pynliner==0.8.0",
     ],
 )
