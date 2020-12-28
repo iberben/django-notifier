@@ -26,8 +26,14 @@ from notifier import managers
 class BaseModel(models.Model):
 
     """Abstract base class with auto-populated created and updated fields. """
-    created = models.DateTimeField(default=now, db_index=True)
-    updated = models.DateTimeField(default=now, db_index=True)
+    created = models.DateTimeField(
+        default=now,
+        db_index=True
+    )
+    updated = models.DateTimeField(
+        default=now,
+        db_index=True
+    )
 
     class Meta:
         abstract = True
@@ -41,17 +47,31 @@ class Backend(BaseModel):
     """
     Entries for various delivery backends (SMS, Email)
     """
-    name = models.CharField(max_length=200, unique=True, db_index=True)
-    display_name = models.CharField(max_length=200, null=True)
-    description = models.CharField(max_length=500, null=True)
+    name = models.CharField(
+        max_length=200,
+        unique=True,
+        db_index=True
+    )
+    display_name = models.CharField(
+        max_length=200,
+        null=True
+    )
+    description = models.CharField(
+        max_length=500,
+        null=True
+    )
 
     # This can be set to False to stop all deliveries using this
     # method, regardless of permissions and preferences
-    enabled = models.BooleanField(default=True)
+    enabled = models.BooleanField(
+        default=True
+    )
 
     # The klass value defines the class to be used to send the notification.
-    klass = models.CharField(max_length=500,
-                             help_text='Example: notifier.backends.EmailBackend')
+    klass = models.CharField(
+        max_length=500,
+        help_text='Example: notifier.backends.EmailBackend'
+    )
 
     def __unicode__(self):
         return self.name
@@ -104,22 +124,36 @@ class Notification(BaseModel):
     """
     Entries for various notifications
     """
-    name = models.CharField(max_length=200, unique=True, db_index=True)
-    display_name = models.CharField(max_length=200)
+    name = models.CharField(
+        max_length=200,
+        unique=True,
+        db_index=True
+    )
+    display_name = models.CharField(
+        max_length=200
+    )
 
     # This field determines whether the notification is to be shown
     #   to users or it is private and only set by code.
     # This only affects UI, the notification is otherwise enabled
     #   and usable in all ways.
-    public = models.BooleanField(default=True)
+    public = models.BooleanField(
+        default=True
+    )
 
     # user should have all the permissions selected here to be able to change
     # the user prefs for this notification or see it in the UI
-    permissions = models.ManyToManyField(Permission, blank=True)
+    permissions = models.ManyToManyField(
+        Permission,
+        blank=True,
+    )
 
     # These are the backend methods that are allowed for this type of
     # notification
-    backends = models.ManyToManyField(Backend, blank=True)
+    backends = models.ManyToManyField(
+        Backend,
+        blank=True,
+    )
 
     objects = managers.NotificationManager()
 
@@ -271,36 +305,40 @@ class Notification(BaseModel):
         return result
 
     def send(self, users, context=None):
-        # print '>> sending notification'
         if not isinstance(users, Iterable):
             users = [users]
 
         for user in users:
-            # print '>> sending to user ', user
             # check if user object
             if isinstance(user, get_user_model()):
                 for backend in self.get_backends(user):
-                    # print '>> backend ', backend
-                    # print backend.__class__
                     backend.send(user, self, context)
             # check for anonymous email address
             # bypass checks for preferences
             # each backend is responsible for handling the email
-            elif isinstance(user, unicode):
+            elif isinstance(user, str):
                 for backend in Backend.objects.filter(enabled=True):
                     backend.send_anonymous(user, self, context)
 
 
 class GroupPrefs(BaseModel):
-
     """
     Per group notification settings
 
     If notification is not explicitly set to True, then default to False.
     """
-    group = models.ForeignKey(Group)
-    notification = models.ForeignKey(Notification)
-    backend = models.ForeignKey(Backend)
+    group = models.ForeignKey(
+        Group,
+        on_delete=models.CASCADE,
+    )
+    notification = models.ForeignKey(
+        Notification,
+        on_delete=models.CASCADE,
+    )
+    backend = models.ForeignKey(
+        Backend,
+        on_delete=models.CASCADE,
+    )
     notify = models.BooleanField(default=True)
 
     class Meta:
@@ -314,17 +352,27 @@ class GroupPrefs(BaseModel):
 
 
 class UserPrefs(BaseModel):
-
     """
     Per user notification settings
 
     Supercedes group setting.
     If notification preference is not explicitly set, then use group setting.
     """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    notification = models.ForeignKey(Notification)
-    backend = models.ForeignKey(Backend)
-    notify = models.BooleanField(default=True)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    notification = models.ForeignKey(
+        Notification,
+        on_delete=models.CASCADE,
+    )
+    backend = models.ForeignKey(
+        Backend,
+        on_delete=models.CASCADE,
+    )
+    notify = models.BooleanField(
+        default=True
+    )
 
     objects = managers.UserPrefsManager()
 
@@ -344,17 +392,35 @@ class UserPrefs(BaseModel):
 
 
 class SentNotification(BaseModel):
-
     """
     Record of every notification sent.
     Either user or to should be filled in.
     """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True)
-    to = models.CharField(max_length=255, null=True, blank=True)
-    notification = models.ForeignKey(Notification)
-    backend = models.ForeignKey(Backend)
-    success = models.BooleanField(default=False)
-    read = models.BooleanField(default=False)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
+    to = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    notification = models.ForeignKey(
+        Notification,
+        on_delete=models.CASCADE,
+    )
+    backend = models.ForeignKey(
+        Backend,
+        on_delete=models.CASCADE,
+    )
+    success = models.BooleanField(
+        default=False
+    )
+    read = models.BooleanField(
+        default=False
+    )
 
     def __unicode__(self):
         return '%s:%s:%s' % (self.user, self.notification, self.backend)

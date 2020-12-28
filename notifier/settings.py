@@ -1,16 +1,15 @@
 ###############################################################################
-## Imports
+# Imports
 ###############################################################################
 # Python
 from importlib import import_module
 
 # Django
-from django.core.exceptions import ImproperlyConfigured
 from django.conf import settings
 
 
 ###############################################################################
-## App Settings
+# App Settings
 ###############################################################################
 BACKENDS = getattr(
     settings,

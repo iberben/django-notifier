@@ -1,5 +1,5 @@
 ###############################################################################
-## Imports
+# Imports
 ###############################################################################
 # Python
 from collections import Iterable
@@ -13,10 +13,15 @@ from notifier.models import Notification, Backend, UserPrefs
 
 
 ###############################################################################
-## Code
+# Code
 ###############################################################################
-def create_notification(name, display_name=None,
-                        permissions=None, backends=None, public=True):
+def create_notification(
+    name,
+    display_name=None,
+    permissions=None,
+    backends=None,
+    public=True
+):
     """
     Arguments
 
@@ -46,16 +51,19 @@ def create_notification(name, display_name=None,
     try:
         n = Notification.objects.get(name=name)
     except Notification.DoesNotExist:
-        n = Notification.objects.create(name=name, display_name=display_name,
-            public=public)
-        n.permissions.add(*permissions)
-        n.backends.add(*backends)
+        n = Notification.objects.create(
+            name=name,
+            display_name=display_name,
+            public=public
+        )
+        n.permissions.set(permissions)
+        n.backends.set(backends)
     else:
         n.name = name
         n.display_name = display_name
         n.public = public
-        n.permissions = permissions
-        n.backends = backends
+        n.permissions.set(permissions)
+        n.backends.set(backends)
         n.save()
 
     return n

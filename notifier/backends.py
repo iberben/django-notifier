@@ -26,8 +26,10 @@ class BaseBackend(object):
 
     def __init__(self, notification, *args, **kwargs):
         self.notification = notification
-        self.template = ('/notifier/%s/%s.txt' %
-                         (notification.name, self.name))
+        self.template = (
+            '/notifier/%s/%s.txt' %
+            (notification.name, self.name)
+        )
 
     # Define how to send the notification
     def send(self, user, context=None):
@@ -40,6 +42,12 @@ class BaseBackend(object):
             'user': user,
             'site': Site.objects.get_current() if settings.SITE_ID else None
         })
+
+    def send_anonymous(self, to, context=None):
+        """
+        Send an email to just an email address.
+        """
+        return False
 
 
 class EmailBackend(BaseBackend):
@@ -108,46 +116,31 @@ class EmailBackend(BaseBackend):
                 if settings.SITE_ID else None
             })
 
-        subject = render_to_string(self.template_subject, self.context)
+        subject = render_to_string(
+            self.template_subject,
+            self.context
+        )
         subject = ''.join(subject.splitlines())
-        text_message = render_to_string(self.template_text_message,
-                                        self.context)
-        html_message = Pynliner().from_string(
-            render_to_string(self.template_html_message,
-                             self.context)).run()
+        text_message = render_to_string(
+            self.template_text_message,
+            self.context
+        )
+        html_message = transform(
+            html=render_to_string(self.template_html_message, context),
+            strip_important=False,
+            keep_style_tags=True,
+            cssutils_logging_level=logging.ERROR,
+        )
 
         try:
-            # print '>> sending mail to ', to
-            send_mail(subject=subject, message=text_message,
-                      from_email=settings.DEFAULT_FROM_EMAIL,
-                      recipient_list=[to, ],
-                      html_message=html_message)
+            send_mail(
+                subject=subject,
+                message=text_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[to, ],
+                html_message=html_message
+            )
         except SMTPException:
             return False
         else:
             return True
-
-
-class PushBackend(BaseBackend):
-    name = 'push'
-    display_name = 'Push'
-    description = 'Send via a push message'
-
-    def __init__(self, notification, *args, **kwargs):
-        super(PushBackend, self).__init__(notification, *args, **kwargs)
-
-        self.template_subject = (
-            'notifier/%s/%s_push.txt' % (notification.name, self.name)
-        )
-
-    def send(self, user, context=None):
-        super(PushBackend, self).send(user, context)
-
-        # todo send push message
-
-    def send_anonymous(self, to, context=None):
-        """
-        Send an email to just an email address.
-        """
-        # raise Exception('Sending anonymous is not possible for the push backend')
-        return False
