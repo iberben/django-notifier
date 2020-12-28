@@ -38,8 +38,8 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(default=django.utils.timezone.now, db_index=True)),
                 ('updated', models.DateTimeField(default=django.utils.timezone.now, db_index=True)),
                 ('notify', models.BooleanField(default=True)),
-                ('backend', models.ForeignKey(to='notifier.Backend')),
-                ('group', models.ForeignKey(to='auth.Group')),
+                ('backend', models.ForeignKey(to='notifier.Backend', on_delete=models.CASCADE)),
+                ('group', models.ForeignKey(to='auth.Group', on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -70,9 +70,9 @@ class Migration(migrations.Migration):
                 ('updated', models.DateTimeField(default=django.utils.timezone.now, db_index=True)),
                 ('success', models.BooleanField(default=False)),
                 ('read', models.BooleanField(default=False)),
-                ('backend', models.ForeignKey(to='notifier.Backend')),
-                ('notification', models.ForeignKey(to='notifier.Notification')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('backend', models.ForeignKey(to='notifier.Backend', on_delete=models.CASCADE)),
+                ('notification', models.ForeignKey(to='notifier.Notification', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
                 'abstract': False,
@@ -86,9 +86,9 @@ class Migration(migrations.Migration):
                 ('created', models.DateTimeField(default=django.utils.timezone.now, db_index=True)),
                 ('updated', models.DateTimeField(default=django.utils.timezone.now, db_index=True)),
                 ('notify', models.BooleanField(default=True)),
-                ('backend', models.ForeignKey(to='notifier.Backend')),
-                ('notification', models.ForeignKey(to='notifier.Notification')),
-                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL)),
+                ('backend', models.ForeignKey(to='notifier.Backend', on_delete=models.CASCADE)),
+                ('notification', models.ForeignKey(to='notifier.Notification', on_delete=models.CASCADE)),
+                ('user', models.ForeignKey(to=settings.AUTH_USER_MODEL, on_delete=models.CASCADE)),
             ],
             options={
             },
@@ -101,7 +101,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='groupprefs',
             name='notification',
-            field=models.ForeignKey(to='notifier.Notification'),
+            field=models.ForeignKey(to='notifier.Notification', on_delete=models.CASCADE),
             preserve_default=True,
         ),
         migrations.AlterUniqueTogether(
