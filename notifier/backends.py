@@ -4,13 +4,15 @@
 # Python
 from smtplib import SMTPException
 
+import logging
+
 # Django
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
-from pynliner import Pynliner
+from premailer import transform
 
 
 ###############################################################################
@@ -61,19 +63,33 @@ class EmailBackend(BaseBackend):
     def send(self, user, context=None):
         super(EmailBackend, self).send(user, context)
 
-        subject = render_to_string(self.template_subject, self.context)
+        subject = render_to_string(
+            self.template_subject,
+            self.context
+        )
         subject = ''.join(subject.splitlines())
-        text_message = render_to_string(self.template_text_message,
-                                        self.context)
-        html_message = Pynliner().from_string(
-            render_to_string(self.template_html_message,
-                             self.context)).run()
+        text_message = render_to_string(
+            self.template_text_message,
+            self.context
+        )
+        html_message = transform(
+            html=render_to_string(
+                self.template_html_message,
+                self.context
+            ),
+            strip_important=False,
+            keep_style_tags=True,
+            cssutils_logging_level=logging.CRITICAL
+        )
 
         try:
-            send_mail(subject=subject, message=text_message,
-                      from_email=settings.DEFAULT_FROM_EMAIL,
-                      recipient_list=[user.email, ],
-                      html_message=html_message)
+            send_mail(
+                subject=subject,
+                message=text_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email, ],
+                html_message=html_message
+            )
         except SMTPException:
             return False
         else:
